@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Juego | Basura Electrónica</title>
+  <style>
+    /* Reset y estilos básicos */
+    * {
+      box-sizing: border-box;
+    }
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      background-color: #f0fff0;
+      color: #333;
+      text-align: center;
+    }
+    header, footer {
+      background-color: #4CAF50;
+      color: white;
+      padding: 15px 10px;
+    }
+    nav {
+      margin-top: 10px;
+    }
+    nav a {
+      color: white;
+      margin: 0 12px;
+      text-decoration: none;
+      font-weight: bold;
+      cursor: pointer;
+      font-size: 1.1em;
+    }
+    nav a:hover {
+      text-decoration: underline;
+    }
+    main {
+      max-width: 900px;
+      margin: 20px auto;
+      padding: 0 15px;
+    }
+    section {
+      display: none;
+      margin-bottom: 40px;
+    }
+    section.active {
+      display: block;
+    }
+    h1, h2 {
+      margin-bottom: 15px;
+    }
+    p {
+      font-size: 1.1em;
+      line-height: 1.5em;
+      margin-bottom: 20px;
+    }
+    img {
+      max-width: 100%;
+      height: auto;
+      border-radius: 8px;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+      margin-bottom: 20px;
+    }
+    /* Canvas */
+    canvas {
+      background-color: #e0ffe0;
+      border: 2px solid #4CAF50;
+      display: block;
+      margin: 20px auto;
+    }
+    #score {
+      font-size: 1.3em;
+      font-weight: bold;
+      margin-top: 10px;
+      color: #2e7d32;
+    }
+    footer p {
+      margin: 0;
+      font-size: 0.9em;
+    }
+    /* Responsive nav */
+    @media(max-width: 600px){
+      nav a {
+        display: inline-block;
+        margin: 8px 5px;
+      }
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <h1>Juego de la Víbora Recicladora</h1>
+  <nav>
+    <a onclick="mostrarSeccion('inicio')">Inicio</a>
+    <a onclick="mostrarSeccion('importancia')">Importancia</a>
+    <a onclick="mostrarSeccion('reciclaje')">Reciclaje</a>
+    <a onclick="mostrarSeccion('lugares')">¿Dónde reciclar?</a>
+    <a onclick="mostrarSeccion('juego')">Juego</a>
+    <a onclick="mostrarSeccion('contacto')">Contacto</a>
+  </nav>
+</header>
+
+<main>
+  <section id="inicio" class="active">
+    <h2>Inicio</h2>
+    <p>Bienvenido al proyecto sobre reciclaje de basura electrónica. Aprende, juega y contribuye a cuidar el planeta.</p>
+    <img src="D:\PROYECTOPAEC\PAE\WhatsApp Image 2025-06-12 at 11.39.41 AM (1).jpeg." alt="Basura electrónica amontonada">
+  </section>
+
+  <section id="importancia">
+    <h2>Importancia del Reciclaje Electrónico</h2>
+    <p>El reciclaje de basura electrónica reduce la contaminación ambiental y permite recuperar materiales valiosos para reutilizarlos.</p>
+    <img src="D:\PROYECTOPAEC\PAE\WhatsApp Image 2025-06-12 at 11.39.41 AM (2).jpeg" alt="Montón de dispositivos electrónicos">
+  </section>
+
+  <section id="reciclaje">
+    <h2>¿Cómo se recicla?</h2>
+    <p>Los dispositivos electrónicos se desmontan, separan y procesan para extraer materiales útiles, evitando daños al medio ambiente.</p>
+    <img src="D:\PROYECTOPAEC\PAE\WhatsApp Image 2025-06-12 at 11.39.41 AM.jpeg" alt="Proceso de reciclaje de electrónica">
+  </section>
+
+  <section id="lugares">
+    <h2>¿Dónde reciclar?</h2>
+    <p>Busca centros especializados o campañas locales para entregar tus dispositivos electrónicos usados.</p>
+    <img src="D:\PROYECTOPAEC\PAE\WhatsApp Image 2025-06-12 at 11.39.42 AM (1).jpeg" alt="Contenedor para reciclaje electrónico">
+  </section>
+
+  <section id="juego">
+    <h2>Juego: La Víbora Recicladora</h2>
+    <p>Usa las flechas del teclado para mover la víbora y recolectar basura reciclable (verde). ¡Evita la basura peligrosa (roja)!</p>
+    <canvas id="gameCanvas" width="400" height="400"></canvas>
+    <p id="score">Puntos: 0</p>
+  </section>
+
+  <section id="contacto">
+    <h2>Contacto</h2>
+    <p>Si tienes preguntas o quieres colaborar, escríbenos a contacto@reciclaje.com</p>
+    <img src="D:\PROYECTOPAEC\PAE\WhatsApp Image 2025-06-12 at 12.50.37 PM.jpeg" alt="Contacto">
+  </section>
+</main>
+
+<footer>
+  <p>Proyecto Final | Reciclaje de Basura Electrónica | 2025</p>
+</footer>
+
+<script>
+  // Función para mostrar solo la sección activa
+  function mostrarSeccion(id) {
+    document.querySelectorAll('main section').forEach(sec => {
+      sec.classList.remove('active');
+    });
+    document.getElementById(id).classList.add('active');
+  }
+
+  // Juego de la víbora recicladora
+  const canvas = document.getElementById('gameCanvas');
+  const ctx = canvas.getContext('2d');
+  const box = 20;
+  let snake = [{x: 9 * box, y: 10 * box}];
+  let direction = null;
+  let score = 0;
+
+  let recyclable = generarPosicion();
+  let danger = generarPosicion();
+
+  // Genera posición aleatoria múltiplo de box y sin que colisione con serpiente
+  function generarPosicion() {
+    let x, y;
+    do {
+      x = Math.floor(Math.random() * 20) * box;
+      y = Math.floor(Math.random() * 20) * box;
+    } while (snake.some(s => s.x === x && s.y === y));
+    return {x, y};
+  }
+
+  document.addEventListener('keydown', e => {
+    if (e.key === 'ArrowLeft' && direction !== 'RIGHT') direction = 'LEFT';
+    else if (e.key === 'ArrowUp' && direction !== 'DOWN') direction = 'UP';
+    else if (e.key === 'ArrowRight' && direction !== 'LEFT') direction = 'RIGHT';
+    else if (e.key === 'ArrowDown' && direction !== 'UP') direction = 'DOWN';
+  });
+
+  function draw() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+    // Dibuja la serpiente
+    snake.forEach((segment, i) => {
+      ctx.fillStyle = i === 0 ? 'green' : 'lightgreen';
+      ctx.fillRect(segment.x, segment.y, box, box);
+      ctx.strokeStyle = 'darkgreen';
+      ctx.strokeRect(segment.x, segment.y, box, box);
+    });
+
+    // Dibuja basura reciclable
+    ctx.fillStyle = 'lime';
+    ctx.fillRect(recyclable.x, recyclable.y, box, box);
+
+    // Dibuja basura peligrosa
+    ctx.fillStyle = 'red';
+    ctx.fillRect(danger.x, danger.y, box, box);
+
+    if (!direction) return; // no avanzar si no hay dirección
+
+    // Calcula nueva cabeza
+    let headX = snake[0].x;
+    let headY = snake[0].y;
+
+    if (direction === 'LEFT') headX -= box;
+    else if (direction === 'UP') headY -= box;
+    else if (direction === 'RIGHT') headX += box;
+    else if (direction === 'DOWN') headY += box;
+
+    // Verifica choque con paredes o consigo mismo
+    if (
+      headX < 0 || headX >= canvas.width ||
+      headY < 0 || headY >= canvas.height ||
+      snake.some(s => s.x === headX && s.y === headY)
+    ) {
+      clearInterval(game);
+      alert('¡Perdiste! Puntaje final: ' + score);
+      location.reload();
+      return;
+    }
+
+    // Verifica choque con basura peligrosa
+    if (headX === danger.x && headY === danger.y) {
+      clearInterval(game);
+      alert('¡Perdiste! Tocaste basura peligrosa. Puntaje final: ' + score);
+      location.reload();
+      return;
+    }
+
+    // Si come basura reciclable
+    if (headX === recyclable.x && headY === recyclable.y) {
+      score++;
+      document.getElementById('score').textContent = 'Puntos: ' + score;
+      recyclable = generarPosicion();
+
+      // Evitar que basura peligrosa quede encima de la reciclable
+      if (danger.x === recyclable.x && danger.y === recyclable.y) {
+        danger = generarPosicion();
+      }
+    } else {
+      // Mover la serpiente (quita la cola)
+      snake.pop();
+    }
+
+    // Añade nueva cabeza
+    snake.unshift({x: headX, y: headY});
+  }
+
+  const game = setInterval(draw, 100);
+</script>
+
+</body>
+</html>
